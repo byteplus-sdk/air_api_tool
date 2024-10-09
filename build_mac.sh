@@ -1,0 +1,1 @@
+GOOS=darwin GOARCH=amd64 go build -o air_api_tool_mac *.go
