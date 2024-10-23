@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/3rd_rec/air_api_tool/client"
 	"github.com/3rd_rec/air_api_tool/helper"
 	"github.com/3rd_rec/air_api_tool/utils"
 	"io/ioutil"
@@ -62,8 +63,22 @@ func (s *Service) checkArgs() error {
 			}
 		}
 	}
-	if len(s.args.AddFields) == 0 && len(s.args.DeleteFields) == 0 && !s.args.Show && !s.args.Clear {
+	if len(s.args.AddFields) == 0 && len(s.args.DeleteFields) == 0 && !s.args.Show && !s.args.Clear && !s.args.Load {
 		return errors.New("no valid args. Use `api_tool schema --help` to view the usage")
+	}
+	if s.args.Load {
+		if len(s.args.SpreadsheetLink) == 0 {
+			return errors.New("--spreadsheet-link is required when loading schema")
+		}
+		if len(s.args.SubSheetName) == 0 {
+			return errors.New("--sub-sheet is required when loading schema")
+		}
+		if len(s.args.FieldNameColumnName) == 0 {
+			return errors.New("--field-name-column is required when loading schema")
+		}
+		if len(s.args.FieldTypeColumnName) == 0 {
+			return errors.New("--field-type-column is required when loading schema")
+		}
 	}
 	return nil
 }
@@ -97,6 +112,9 @@ func (s *Service) executeCmd() error {
 		return err
 	}
 	if err := s.deleteFields(); err != nil {
+		return err
+	}
+	if err := s.loadSchema(); err != nil {
 		return err
 	}
 	if err := s.saveSchema(); err != nil {
@@ -137,6 +155,7 @@ func (s *Service) addFields() error {
 			continue
 		}
 		s.schema = append(s.schema, needAddField)
+		s.schemaMap[needAddField.Name] = needAddField
 	}
 	s.updated = true
 	return nil
@@ -188,6 +207,64 @@ func (s *Service) deleteFields() error {
 
 	s.schema = schemaAfterDeleted
 	s.updated = true
+	return nil
+}
+
+func (s *Service) loadSchema() error {
+	if !s.args.Load {
+		return nil
+	}
+	request := &client.LoadSchemaRequest{
+		SpreadsheetLink:     s.args.SpreadsheetLink,
+		SubSheetName:        s.args.SubSheetName,
+		FieldNameColumnName: s.args.FieldNameColumnName,
+		FieldTypeColumnName: s.args.FieldTypeColumnName,
+	}
+	schema, err := client.LoadSchema(request)
+	if err != nil {
+		return err
+	}
+	err = s.updateSchema(schema)
+	if err != nil {
+		return err
+	}
+	s.updated = true
+	return nil
+}
+
+func (s *Service) updateSchema(schema *client.ParsedSchema) error {
+	var (
+		addCount    int
+		updateCount int
+	)
+
+	for _, mField := range schema.Fields {
+		fieldName := mField.Name
+		fieldType := mField.Type
+		existField, exist := s.schemaMap[fieldName]
+		if !exist {
+			newField := &Field{
+				Name:   fieldName,
+				Type:   fieldType,
+				Custom: true,
+			}
+			s.schemaMap[fieldName] = newField
+			s.schema = append(s.schema, newField)
+			addCount += 1
+			continue
+		}
+		if existField.Custom && existField.Type != fieldType {
+			existField.Type = fieldType
+			updateCount += 1
+			continue
+		}
+		// The preset field cannot be modified.
+		if !existField.Custom && existField.Type != fieldType {
+			msg := fmt.Sprintf("preset field: %s type cannot be modified, only customized fields can be modified", existField.Name)
+			return errors.New(msg)
+		}
+	}
+	fmt.Printf("load schema successful. Added %d new fields, and updated %d fields.\n", addCount, updateCount)
 	return nil
 }
 

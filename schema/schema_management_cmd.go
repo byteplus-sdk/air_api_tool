@@ -38,6 +38,17 @@ type Args struct {
 
 	// Print the current Schema configuration after executing the command.
 	Show bool
+
+	// Load schema configuration from Lark Spreadsheet.
+	Load bool
+
+	SpreadsheetLink string
+
+	SubSheetName string
+
+	FieldNameColumnName string
+
+	FieldTypeColumnName string
 }
 
 type ManagementCommand struct {
@@ -97,6 +108,36 @@ func (c *ManagementCommand) GetCMD() *cobra.Command {
 		"s",
 		false,
 		"Print the current schema configuration.",
+	)
+	c.command.Flags().BoolVar(
+		&c.args.Load,
+		"load",
+		false,
+		"Load schema configuration from Lark Spreadsheet.",
+	)
+	c.command.Flags().StringVar(
+		&c.args.SpreadsheetLink,
+		"spreadsheet-link",
+		"",
+		"Required when loading schema. Lark Spreadsheet Link, typically a DRS document link negotiated with Byteplus team.",
+	)
+	c.command.Flags().StringVar(
+		&c.args.SubSheetName,
+		"sub-sheet",
+		"",
+		"Required when loading schema. The sub-sheet name corresponding to the current table, typically DRS contains multiple sheets corresponding to different tables. For example, in the saas_content industry, it may include three sub-sheets: User, Content, and UserEvent.",
+	)
+	c.command.Flags().StringVar(
+		&c.args.FieldNameColumnName,
+		"field-name-column",
+		"Byteplus Field Name",
+		"Required when loading schema. Column name corresponding to the field name.",
+	)
+	c.command.Flags().StringVar(
+		&c.args.FieldTypeColumnName,
+		"field-type-column",
+		"Type",
+		"Required when loading schema. Column name corresponding to the field type. The field types will be mapped to formats supported by the validation tool.",
 	)
 	c.command.Flags().BoolVarP(
 		&c.args.Clear,
