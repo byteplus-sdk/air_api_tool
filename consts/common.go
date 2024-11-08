@@ -75,4 +75,4 @@ var (
 )
 
 const EnvNameDataDir = "AIR_API_TOOL_DATA_DIR"
-const DefaultDataDir = "~/share/air_api_tool"
+const DefaultDataDirPrefix = "/share/air_api_tool"

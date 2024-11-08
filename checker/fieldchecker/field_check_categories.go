@@ -42,8 +42,9 @@ func (c *CategoriesChecker) Create(checkerCfg *shared.CommonCheckerCfg) (checker
 	return instance, nil
 }
 
+var correctFormat = "Correct format example: \"[{\\\"category_depth\\\":1,\\\"category_nodes\\\":[{\\\"id_or_name\\\":\\\"Movie\\\"}]},\n{\\\"category_depth\\\":2,\\\"category_nodes\\\":[{\\\"id_or_name\\\":\\\"Comedy\\\"}]}]\""
+
 func (c *CategoriesChecker) Description() string {
-	var correctFormat = "correct format example: \"[{\\\"category_depth\\\":1,\\\"category_nodes\\\":[{\\\"id_or_name\\\":\\\"Movie\\\"}]},\n{\\\"category_depth\\\":2,\\\"category_nodes\\\":[{\\\"id_or_name\\\":\\\"Comedy\\\"}]}]\""
 	return fmt.Sprintf("json array string of category element. categories#category_nodes[n]#id_or_name can't be empty, categories#category_depth should start with 1 with continuous integers. %s", correctFormat)
 }
 
@@ -72,7 +73,8 @@ func (c *CategoriesChecker) doCheck(categoriesStr string) error {
 	var categories []*Category
 	err := json.Unmarshal([]byte(categoriesStr), &categories)
 	if err != nil {
-		return errors.New("the value of `categories` is format as json err")
+		errMsg := fmt.Sprintf("Invalid categories format, it must be an array of categories. %s", correctFormat)
+		return errors.New(errMsg)
 	}
 	if len(categories) == 0 {
 		return nil
