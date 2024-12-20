@@ -91,6 +91,13 @@ var (
 			FieldName:   "current_price",
 			CheckerName: consts.CheckerNameRanges,
 			CheckerCfg: &shared.CommonCheckerCfg{
+				Required: true,
+			},
+		},
+		{
+			FieldName:   "current_price",
+			CheckerName: consts.CheckerNameRanges,
+			CheckerCfg: &shared.CommonCheckerCfg{
 				RangeCfgList: []*shared.RangeCfg{
 					{
 						Gt: utils.Float64Ptr(0),
