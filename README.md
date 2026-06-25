@@ -1,7 +1,9 @@
 # air_api_tool
 ## Introduction
 The API validation tool is used to reduce the communication costs between clients and API engineers by fixing feedback related to data issues during data preparation. The API validation tool simulates the complete process that the Byteplus team follows when importing customer data, including Data Format validation (Data Parse Check), Schema validation (Data Type Check), and Checker validation (Data Value Check). Customers can use the API validation tool to validate locally exported files and fix issues within the data. This process does not require the involvement of API engineers. This will be efficient for both customers and API engineers. Customers do not need to wait for API engineers to check data files. API engineers also do not need to wait for customers to fix data before rechecking. When customers provide data to the Byteplus team, the data will be of high quality.
-
+## Security and privacy
+This project takes security seriously.
+For vulnerability reporting and supported versions, see [SECURITY.md](SECURITY.md)
 
 ## Document
 [API Validate Tool Use Guide](https://bytedance.larkoffice.com/wiki/O15AwqMKIiZ4f6kCrp8cE4xPnRg)
