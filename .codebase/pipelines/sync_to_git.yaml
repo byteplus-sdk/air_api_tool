@@ -1,0 +1,15 @@
+name: Sync code to Github
+trigger:
+  # MR merged
+  change:
+    types: [ submit ]
+jobs:
+  sync_to_github:
+    name: Sync code to github
+    image: doxraybv/ci_python_36:latest
+    envs:
+      GIT_NAME: ${{GIT_NAME}}
+      GIT_TOKEN: ${{GIT_TOKEN}}
+    steps:
+      - commands:
+          - bash -ex sync_to_github.sh
